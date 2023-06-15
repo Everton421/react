@@ -1,0 +1,21 @@
+.dv{
+width: 100%;
+}
+.dv .container .container2{
+margin-top: 20px;
+}
+
+
+#boxprod{
+  align-items: center;
+  justify-content: space-between;
+  display: flex;
+}
+.a{
+  text-decoration: none;
+
+}
+#delete{
+
+  border-radius: 100px;
+}
