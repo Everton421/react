@@ -10,6 +10,7 @@ margin-top: 20px;
   align-items: center;
   justify-content: space-between;
   display: flex;
+
 }
 .a{
   text-decoration: none;
@@ -18,4 +19,12 @@ margin-top: 20px;
 #delete{
 
   border-radius: 100px;
+}
+
+
+#boxclient{
+  align-items: center;
+  justify-content: space-between;
+  display: flex;
+
 }

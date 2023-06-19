@@ -30,20 +30,21 @@ function App() {
   const [cliorca, setCliorca] = useState({});
   const [orcamento, setOrcamento] = useState({})
   const [dadosorcamento, setDadosorcamento] = useState();
-
+  const [totalProduto, setTotalProduto] = useState(0);
   const [buscador, setBuscador] = useState("");
 
   const adicionarproduto = (produto, descricao, valor, desconto) => {
-    setProorca([...proorca, { "prod": produto, "descricao": descricao, "qtd": 1, "preco": valor, "desconto": desconto }])
-  }
-
+    const novoProduto = { "prod": produto, "descricao": descricao, "qtd": 1, "preco": valor, "desconto": 0 };
+    novoProduto.totalProduto = novoProduto.qtd * novoProduto.preco;
+    setProorca([...proorca, novoProduto]);
+    setTotalProduto(totalProduto + novoProduto.totalProduto);
+  };
+  
 
   const adicionaClient = (cliente) => {
     console.log(cliente)
     setCliorca(cliente)
-
   }
-
 
   const removeProduto = (produto) => {
     const novosProdutos = proorca.filter((item) => item.prod !== produto);
@@ -54,36 +55,47 @@ function App() {
     const novosProdutos = [...proorca];
     const produto = novosProdutos[index];
     produto.qtd = quantidade;
-    produto.totalProdutos = produto.qtd * produto.preco;
+    produto.totalProduto = produto.qtd * produto.preco;
     setProorca(novosProdutos);
     console.log(novosProdutos)
   };
 
   const addDesconto = (index, desconto) => {
-
     const novosProdutos = [...proorca];
     const produto = novosProdutos[index];
+  
+    if (desconto > produto.preco) {
+      alert("Valor de desconto maior do que o valor do produto!");
+      
+      
 
-
-    if(desconto > produto.preco){
-      alert("valor de desconto maior do que o valor do produto!")
-    }else{
-    produto.totalProdutos = produto.qtd * produto.preco - desconto;
-    setProorca(novosProdutos);
-    console.log(novosProdutos)
+    } else {
+      produto.desconto = desconto;
+      produto.totalProduto = produto.qtd * produto.preco - produto.desconto;
+      setProorca(novosProdutos);
+      calcularTotal();
     }
-  }
+  };
+  
 
 
   function enviarorcamento(cliorca, proorca) {
+
     const novoOrcamento = { "cliente": cliorca, "produtos": proorca };
+    
+    if(novoOrcamento.cliente.codigo == '' || novoOrcamento.cliente.codigo == undefined){
+      
+    return alert("é necessário definir um cliente!") 
+    }else{
+      if(novoOrcamento.produtos == '' || novoOrcamento.produtos == undefined){
+        alert("não é possivel gravar sem produtos!")
+      }
+    }
     setOrcamento(novoOrcamento);
   }
 
   useEffect(() => {
     console.log(orcamento);
-    // Faça a chamada para enviar o orçamento usando axios.post aqui
-    // Certifique-se de que orcamento tenha sido atualizado corretamente antes de fazer a chamada
     axios.post('http://192.168.100.130:3000/teste', orcamento)
       .then((response) => { console.log(response) })
       .catch((err) => { console.log(err) });
@@ -117,25 +129,33 @@ function App() {
   }, []);
 
 
-  useEffect(() => {
-    function selectProd(valor) {
-      setBuscador(valoe.target.value)
-    }
-
-  }, [])
-
 
   const calcularTotal = () => {
-    let total = 0;
+    let totalGeral = 0;
     proorca.forEach((produto) => {
-      total += (produto.qtd * produto.preco );
+      totalGeral += produto.totalProduto;
     });
-
-    return total;
+    return {
+      totalGeral,
+    };
   };
+  
 
 
-
+  const calcularTotalDesconto = () => {
+    let totalProduto = 0;
+    let totalValores = 0;
+    let totalComDesconto = 0;
+    
+    proorca.forEach((produto) => {
+      totalProduto += produto.preco * produto.qtd
+      totalComDesconto += (produto.preco * produto.qtd)- produto.desconto
+    });
+totalValores = (totalProduto - totalComDesconto)
+    return { 
+       totalValores,
+    };
+  };
 
   /*
       <ListGroup.Item id='boxprod'key={produto.codigo} action onClick={() => { adicionarproduto(produto.codigo, produto.descricao, produto.PRECO ) }}>
@@ -148,57 +168,44 @@ function App() {
                 
 */
 
-
   return (
-
-
-
-
-
     <div className='dv'>
-
       <Nav1 />
       <div className='container'>
         <div className='container2'>
-
-
-
           <Accordion >
             <Accordion.Item eventKey="0">
-              <Accordion.Header  >cliente {cliorca.nome}</Accordion.Header>
-              <Accordion.Body>
+              <Accordion.Header>  
 
+
+              <Badge bg="primary" pill>
+                    cliente
+                  </Badge>
+                <InputGroup.Text id="inputGroupPrepend"> 
+              
+                {cliorca.nome}</InputGroup.Text>
+                
+                </Accordion.Header>
+              <Accordion.Body>
                 <Form noValidate >
                   <Row className="mb-3">
                     <Form.Group as={Col} md="4" >
                       <Form.Label>cliente</Form.Label>
                       <InputGroup.Text id="inputGroupPrepend">{cliorca.nome}</InputGroup.Text>
-
                     </Form.Group>
-
                     <Form.Group as={Col} md="4" controlId="validationCustom02">
                       <Form.Label>cpf</Form.Label>
                       <InputGroup.Text id="inputGroupPrepend">{cliorca.cpf}</InputGroup.Text>
                     </Form.Group>
-
-
                     <Form.Group as={Col} md="4" controlId="validationCustom02">
                       <Form.Label>IE/RG</Form.Label>
                       <InputGroup.Text id="inputGroupPrepend">{cliorca.rg}</InputGroup.Text>
                     </Form.Group>
-
                   </Row>
-
-
-
-
-
                 </Form>
-
               </Accordion.Body>
             </Accordion.Item>
           </Accordion>
-
 
           <Table striped bordered hover>
             <thead>
@@ -210,12 +217,8 @@ function App() {
                 <th>unitario</th>
                 <th>total</th>
                 <th></th>
-
               </tr>
             </thead>
-
-
-
             {proorca.map((produto, index) => (<tbody>
               <tr>
                 <td>{produto.prod}</td>
@@ -234,9 +237,10 @@ function App() {
                  
                   <InputGroup className="mb-2">
                     <Form.Control id="inlineFormInputGroup" placeholder="desconto"
-                      onChange={(e) => addDesconto(index, e.target.value)}
-
-                      type='number' />
+                      onChange={(e) => addDesconto(index, e.target.value)} 
+                      type='number' 
+                      
+                      />
 
                     <InputGroup.Text> <a className='a'><Badge bg="primary" pill>  R$: {produto.desconto} </Badge></a>  </InputGroup.Text>
                   </InputGroup>
@@ -249,7 +253,7 @@ function App() {
                 </td>
                 <td>
                   <a className='a'><Badge bg="primary" pill>
-                    R$: {produto.totalProdutos}
+                    R$: {produto.totalProduto}
                   </Badge></a>
                 </td>
                 <td>
@@ -261,20 +265,18 @@ function App() {
             ))}
             <thead>
               <tr>
-                <th>total
+                <th>total 
                   <a className='a'> <Badge bg="primary" pill>
-                    R$: {calcularTotal()} </Badge> </a>
+                    R$: {calcularTotal().totalGeral} </Badge> </a>
                 </th>
 
-                <th>total desconto
+                <th>total descontos
                   <a className='a'> <Badge bg="primary" pill>
-                    R$: {calcularTotal()} </Badge> </a>
+                    R$: {calcularTotalDesconto().totalValores} </Badge> </a>
                 </th>
 
               </tr>
             </thead>
-
-
 
           </Table>
           <div className="d-grid gap-2">
@@ -284,6 +286,9 @@ function App() {
 
           </div>
 
+        
+        
+        
           <Accordion >
             <Accordion.Item eventKey="0">
               <Accordion.Header>produtos</Accordion.Header>
@@ -293,7 +298,7 @@ function App() {
                 {prod
                   .filter(
                     (produto) =>
-                      produto.descricao.includes(buscador) ||
+                      produto.descricao.includes(buscador.toUpperCase())||
                       produto.codigo.toString().includes(buscador)
                   )
                   .map((produto) => (
@@ -321,6 +326,10 @@ function App() {
             </Accordion.Item>
           </Accordion>
           <Accordion>
+
+
+
+
             <Accordion.Item eventKey="0">
               <Accordion.Header>clientes</Accordion.Header>
               <Accordion.Body>
