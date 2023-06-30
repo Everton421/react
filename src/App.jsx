@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 
 import ListGroup from 'react-bootstrap/ListGroup';
 import Badge from 'react-bootstrap/Badge';
-
+import Alert from 'react-bootstrap/Alert';
 import './App.css';
+
 import axios from 'axios'
 import Table from 'react-bootstrap/Table';
 
@@ -30,19 +31,25 @@ function App() {
   const [cliorca, setCliorca] = useState({});
   const [orcamento, setOrcamento] = useState({})
   const [dadosorcamento, setDadosorcamento] = useState();
+
   const [totalProduto, setTotalProduto] = useState(0);
   const [buscador, setBuscador] = useState("");
+  const [clienteInvalido, setClienteInvalido] = useState(false);
+ 
+  const [produtoInvalido , setProdutoInvalido] = useState(false);
+
 
   const adicionarproduto = (produto, descricao, valor, desconto) => {
     const novoProduto = { "prod": produto, "descricao": descricao, "qtd": 1, "preco": valor, "desconto": 0 };
     novoProduto.totalProduto = novoProduto.qtd * novoProduto.preco;
     setProorca([...proorca, novoProduto]);
     setTotalProduto(totalProduto + novoProduto.totalProduto);
+    
   };
-  
+
 
   const adicionaClient = (cliente) => {
-    console.log(cliente)
+
     setCliorca(cliente)
   }
 
@@ -56,39 +63,91 @@ function App() {
     const produto = novosProdutos[index];
     produto.qtd = quantidade;
     produto.totalProduto = produto.qtd * produto.preco;
+   
     setProorca(novosProdutos);
     console.log(novosProdutos)
+
+
+
   };
 
   const addDesconto = (index, desconto) => {
     const novosProdutos = [...proorca];
     const produto = novosProdutos[index];
-  
+
     if (desconto > produto.preco) {
       alert("Valor de desconto maior do que o valor do produto!");
-      
-      
-
     } else {
       produto.desconto = desconto;
       produto.totalProduto = produto.qtd * produto.preco - produto.desconto;
       setProorca(novosProdutos);
       calcularTotal();
+
+      let totalDosDescontos = 0 ;
+      let totalComDesconto = 0;
+      let totalProdutos  = 0;
+      let totalGeral = 0;
+     
+    /*  proorca.forEach((produto) => {
+       
+        totalProdutos += produto.preco * produto.qtd
+          totalComDesconto += (produto.preco * produto.qtd) - produto.desconto
+          totalGeral += produto.totalProduto;
+      
+        });
+        setDadosorcamento({"total":totalGeral})
+*/
     }
   };
+
+
+
+  const calcularTotal = () => {
+    let totalGeral = 0;
+    proorca.forEach((produto) => {
+      totalGeral += produto.totalProduto;
+    });
   
-
-
-  function enviarorcamento(cliorca, proorca) {
-
-    const novoOrcamento = { "cliente": cliorca, "produtos": proorca };
-    
-    if(novoOrcamento.cliente.codigo == '' || novoOrcamento.cliente.codigo == undefined){
+    return {
+      totalGeral,
       
-    return alert("é necessário definir um cliente!") 
-    }else{
-      if(novoOrcamento.produtos == '' || novoOrcamento.produtos == undefined){
-        alert("não é possivel gravar sem produtos!")
+  
+    };
+    
+  };
+
+
+
+  const calcularTotalDesconto = () => {
+    let totalProduto = 0;
+    var totalDosDescontos = 0;
+    let totalComDesconto = 0;
+
+    proorca.forEach((produto) => {
+      totalProduto += produto.preco * produto.qtd
+      totalComDesconto += (produto.preco * produto.qtd) - produto.desconto
+    });
+    totalDosDescontos = (totalProduto - totalComDesconto)
+
+    return {
+      totalDosDescontos,
+    };
+  };
+
+ 
+  function enviarorcamento(cliorca, proorca) {
+    const novoOrcamento = {
+      "cliente": cliorca, "produtos": proorca,
+      "dadosorcamento": dadosorcamento
+    };
+
+    if (novoOrcamento.cliente.codigo == '' || novoOrcamento.cliente.codigo == undefined) {
+      setClienteInvalido(true);
+      return;
+    } else {
+      if (novoOrcamento.produtos == '' || novoOrcamento.produtos == undefined) {
+       setProdutoInvalido(true)
+        return;
       }
     }
     setOrcamento(novoOrcamento);
@@ -96,11 +155,15 @@ function App() {
 
   useEffect(() => {
     console.log(orcamento);
-    axios.post('http://192.168.100.130:3000/teste', orcamento)
-      .then((response) => { console.log(response) })
-      .catch((err) => { console.log(err) });
-  }, [orcamento]);
+    if (orcamento == undefined) {
+      console.log("{}")
+    } else {
 
+      axios.post('http://192.168.100.130:3000/teste', orcamento)
+        .then((response) => { alert("orcamento gravado") })
+        .catch((err) => { console.log(err) });
+    }
+  }, [orcamento]);
 
 
 
@@ -128,34 +191,64 @@ function App() {
 
   }, []);
 
-
-
-  const calcularTotal = () => {
-    let totalGeral = 0;
-    proorca.forEach((produto) => {
-      totalGeral += produto.totalProduto;
-    });
-    return {
-      totalGeral,
+  useEffect(() => {
+    const calcularTotalGeral = () => {
+      let totalGeral = 0;
+ 
+      proorca.forEach((produto) => {
+        totalGeral += produto.totalProduto;
+      });
+      return totalGeral;
+   
     };
-  };
+
+
+    const calcularTotalDosProdutos = () => {
+      let TotalDosProdutos = 0;
+ 
+      proorca.forEach((produto) => {
+        TotalDosProdutos += produto.qtd * produto.preco;
+      });
+      return TotalDosProdutos;
+   
+    };
+
+
+
+  
+  
+ 
+    const totalGeral = calcularTotalGeral();
+    const valorTotalProdutos = calcularTotalDosProdutos();
+
+
+    var data = new Date();
+    var dia = String(data.getDate()).padStart(2, '0');
+    var mes = String(data.getMonth() + 1).padStart(2, '0');
+    var ano = data.getFullYear();
+   var dataAtual = ano + '-' + mes + '-' + dia;
+    console.log(dataAtual);
+
+          setDadosorcamento({ ...dadosorcamento,
+          COD_SITE:10,
+            TOTAL: totalGeral,
+            TOTAL_PRODUTOS:valorTotalProdutos,
+            DESC_PROD:calcularTotalDesconto().totalDosDescontos,
+            DATA_CADASTRO:dataAtual,
+            VAL_PROD_MANIP:valorTotalProdutos,
+              SITUACAO:"EA",
+              VENDEDOR: 1,
+              DATA_PEDIDO : dataAtual,
+              DESTACAR: "N",
+              TABELA:"p",
+              DATA_REFER:"C",
+              QTD_PARCELAS:1,
+              EXT_INT_OS:"L"
+
+              });
+  }, [proorca]);
   
 
-
-  const calcularTotalDesconto = () => {
-    let totalProduto = 0;
-    let totalValores = 0;
-    let totalComDesconto = 0;
-    
-    proorca.forEach((produto) => {
-      totalProduto += produto.preco * produto.qtd
-      totalComDesconto += (produto.preco * produto.qtd)- produto.desconto
-    });
-totalValores = (totalProduto - totalComDesconto)
-    return { 
-       totalValores,
-    };
-  };
 
   /*
       <ListGroup.Item id='boxprod'key={produto.codigo} action onClick={() => { adicionarproduto(produto.codigo, produto.descricao, produto.PRECO ) }}>
@@ -173,24 +266,44 @@ totalValores = (totalProduto - totalComDesconto)
       <Nav1 />
       <div className='container'>
         <div className='container2'>
+        {clienteInvalido && (
+        <Alert variant="danger" onClose={() => setClienteInvalido(false)} dismissible id='alert'>
+          Cliente inválido!
+        </Alert>
+      )}
+
+{produtoInvalido && (
+        <Alert variant="danger" onClose={() => setClienteInvalido(false)} dismissible>
+          É necessário informar os produtos para gravar!
+        </Alert>
+      )}
+      
+      
+      
+      
           <Accordion >
             <Accordion.Item eventKey="0">
-              <Accordion.Header>  
+              <Accordion.Header >
 
-
-              <Badge bg="primary" pill>
-                    cliente
-                  </Badge>
-                <InputGroup.Text id="inputGroupPrepend"> 
-              
-                {cliorca.nome}</InputGroup.Text>
+  
+                <Badge bg="primary" pill>
+                  cliente
+                </Badge>
+                <InputGroup.Text id="inputGroupPrepend">
+                  {cliorca.nome}</InputGroup.Text>
+                 
                 
-                </Accordion.Header>
+                  <Badge bg="primary" pill>  CNPJ/CPF</Badge>
+                  <InputGroup.Text id="inputGroupPrepend" >
+                       {cliorca.cpf}
+                   </InputGroup.Text>
+                  
+              </Accordion.Header>
               <Accordion.Body>
                 <Form noValidate >
                   <Row className="mb-3">
                     <Form.Group as={Col} md="4" >
-                      <Form.Label>cliente</Form.Label>
+                      <Form.Label>cliente </Form.Label>
                       <InputGroup.Text id="inputGroupPrepend">{cliorca.nome}</InputGroup.Text>
                     </Form.Group>
                     <Form.Group as={Col} md="4" controlId="validationCustom02">
@@ -205,7 +318,12 @@ totalValores = (totalProduto - totalComDesconto)
                 </Form>
               </Accordion.Body>
             </Accordion.Item>
-          </Accordion>
+          </Accordion> 
+          
+          
+       
+
+
 
           <Table striped bordered hover>
             <thead>
@@ -234,17 +352,17 @@ totalValores = (totalProduto - totalComDesconto)
 
                 </td>
                 <td>
-                 
+
                   <InputGroup className="mb-2">
                     <Form.Control id="inlineFormInputGroup" placeholder="desconto"
-                      onChange={(e) => addDesconto(index, e.target.value)} 
-                      type='number' 
-                      
-                      />
+                      onChange={(e) => addDesconto(index, e.target.value)}
+                      type='number'
+
+                    />
 
                     <InputGroup.Text> <a className='a'><Badge bg="primary" pill>  R$: {produto.desconto} </Badge></a>  </InputGroup.Text>
                   </InputGroup>
-                
+
                 </td>
                 <td>
                   <a className='a'><Badge bg="primary" pill>
@@ -258,24 +376,28 @@ totalValores = (totalProduto - totalComDesconto)
                 </td>
                 <td>
 
-                  <Button variant="danger" id='delete' onClick={() => removeProduto(produto.prod)}>x</Button>
+                  <Button variant="danger" id='delete' onClick={() => removeProduto(produto.prod)}>x
+
+                  </Button>
                 </td>
               </tr>
             </tbody>
             ))}
             <thead>
               <tr>
-                <th>total 
+                <th>total
                   <a className='a'> <Badge bg="primary" pill>
                     R$: {calcularTotal().totalGeral} </Badge> </a>
                 </th>
 
                 <th>total descontos
                   <a className='a'> <Badge bg="primary" pill>
-                    R$: {calcularTotalDesconto().totalValores} </Badge> </a>
+                    R$: {calcularTotalDesconto().totalDosDescontos} </Badge> </a>
                 </th>
 
-              </tr>
+
+
+          </tr>
             </thead>
 
           </Table>
@@ -286,9 +408,9 @@ totalValores = (totalProduto - totalComDesconto)
 
           </div>
 
-        
-        
-        
+
+
+
           <Accordion >
             <Accordion.Item eventKey="0">
               <Accordion.Header>produtos</Accordion.Header>
@@ -298,7 +420,7 @@ totalValores = (totalProduto - totalComDesconto)
                 {prod
                   .filter(
                     (produto) =>
-                      produto.descricao.includes(buscador.toUpperCase())||
+                      produto.descricao.includes(buscador.toUpperCase()) ||
                       produto.codigo.toString().includes(buscador)
                   )
                   .map((produto) => (
