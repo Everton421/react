@@ -159,7 +159,7 @@ function App() {
       console.log("{}")
     } else {
 
-      axios.post('http://192.168.100.130:3000/teste', orcamento)
+      axios.post('http://192.168.237.130:3000/teste', orcamento)
         .then((response) => { alert("orcamento gravado") })
         .catch((err) => { console.log(err) });
     }
@@ -169,7 +169,7 @@ function App() {
 
   useEffect(() => {
     async function buscarProdutos() {
-      await axios.get('http://192.168.100.130:3000/produtos/')
+      await axios.get('http://192.168.237.130:3000/produtos/')
         .then((response) => {
           setProd(response.data);
           // console.log(prod);
@@ -182,7 +182,7 @@ function App() {
     buscarProdutos();
 
     async function buscacliente() {
-      await axios.get('http://192.168.100.130:3000/clientes')
+      await axios.get('http://192.168.237.130:3000/clientes')
         .then((response) => {
           setClient(response.data)
         })
@@ -293,10 +293,6 @@ function App() {
                   {cliorca.nome}</InputGroup.Text>
                  
                 
-                  <Badge bg="primary" pill>  CNPJ/CPF</Badge>
-                  <InputGroup.Text id="inputGroupPrepend" >
-                       {cliorca.cpf}
-                   </InputGroup.Text>
                   
               </Accordion.Header>
               <Accordion.Body>
@@ -328,49 +324,51 @@ function App() {
           <Table striped bordered hover>
             <thead>
               <tr>
-                <th>codigo</th>
-                <th>descrição</th>
-                <th>quantidade</th>
-                <th>desconto</th>
-                <th>unitario</th>
-                <th>total</th>
+                <th id="tdCodigo">cod</th>
+                <th id="tdDescrição" >descrição</th>
+                <th id="tdDescrição" >quantidade</th>
+                <th id="tdDescrição" >desconto</th>
+                <th id="tdDescrição" >unitario</th>
+                <th id="tdDescrição">total</th>
                 <th></th>
               </tr>
             </thead>
             {proorca.map((produto, index) => (<tbody>
               <tr>
-                <td>{produto.prod}</td>
-                <td>{produto.descricao}</td>
+                <td  id="tdCodigo">{produto.prod}</td>
+                <td id='tdDescrição1'>{produto.descricao}</td>
                 <td>
                   <InputGroup className="mb-2">
-                    <Form.Control id="inlineFormInputGroup" placeholder="quantidade"
+                    <Form.Control placeholder="quantidade" id='input'
                       onChange={(e) => atualizarTotalProdutos(index, e.target.value)}
                       value={produto.qtd} type='number' />
 
-                    <InputGroup.Text>{produto.qtd}</InputGroup.Text>
+                    
                   </InputGroup>
-
+                  <Badge  id="tdDescrição1">{produto.qtd}</Badge>
+                  
                 </td>
                 <td>
 
                   <InputGroup className="mb-2">
-                    <Form.Control id="inlineFormInputGroup" placeholder="desconto"
+                    <Form.Control   id='input'
                       onChange={(e) => addDesconto(index, e.target.value)}
                       type='number'
 
                     />
 
-                    <InputGroup.Text> <a className='a'><Badge bg="primary" pill>  R$: {produto.desconto} </Badge></a>  </InputGroup.Text>
+                 
                   </InputGroup>
+                  <Badge bg="primary" pill  id="tdDescrição1">  R$: {produto.desconto} </Badge>
 
                 </td>
                 <td>
-                  <a className='a'><Badge bg="primary" pill>
+                  <a className='a' id="tdDescrição1"><Badge bg="primary" pill>
                     R$: {produto.preco}
                   </Badge></a>
                 </td>
                 <td>
-                  <a className='a'><Badge bg="primary" pill>
+                  <a className='a' id="tdDescrição1"> <Badge bg="primary" pill>
                     R$: {produto.totalProduto}
                   </Badge></a>
                 </td>
@@ -385,12 +383,12 @@ function App() {
             ))}
             <thead>
               <tr>
-                <th>total
+                <th id="tdDescrição">total
                   <a className='a'> <Badge bg="primary" pill>
                     R$: {calcularTotal().totalGeral} </Badge> </a>
                 </th>
 
-                <th>total descontos
+                <th id="tdDescrição">total descontos
                   <a className='a'> <Badge bg="primary" pill>
                     R$: {calcularTotalDesconto().totalDosDescontos} </Badge> </a>
                 </th>
@@ -411,43 +409,52 @@ function App() {
 
 
 
-          <Accordion >
-            <Accordion.Item eventKey="0">
-              <Accordion.Header>produtos</Accordion.Header>
-              <Accordion.Body>
-                <Form.Control id="inlineFormInputGroup" placeholder="produto" type='text' onChange={(e) => setBuscador(e.target.value)} />
 
-                {prod
-                  .filter(
-                    (produto) =>
-                      produto.descricao.includes(buscador.toUpperCase()) ||
-                      produto.codigo.toString().includes(buscador)
-                  )
-                  .map((produto) => (
-                    <ListGroup defaultActiveKey="#link1">
-                      <ListGroup.Item
-                        id="boxprod"
-                        key={produto.codigo}
-                        action
-                        onClick={() => {
-                          adicionarproduto(produto.codigo, produto.descricao, produto.PRECO);
-                        }}
-                      >
-                        <a className="a">  codigo: {produto.codigo}</a>
-                        <a className="a"> {produto.descricao}</a>
-                        <a className="a">
-                          <Badge bg="primary" pill>
-                            R$: {produto.PRECO}
-                          </Badge>
-                        </a>
-                      </ListGroup.Item>
-                    </ListGroup>
-                  ))}
 
-              </Accordion.Body>
-            </Accordion.Item>
-          </Accordion>
           <Accordion>
+  <Accordion.Item eventKey="0">
+    <Accordion.Header>produtos</Accordion.Header>
+    <Accordion.Body>
+      <Form.Control id="inlineFormInputGroup" placeholder="produto" type="text" onChange={(e) => setBuscador(e.target.value)} />
+
+      <ListGroup defaultActiveKey="#link1">
+        {prod
+          .filter(
+            (produto) =>
+              produto.descricao.includes(buscador.toUpperCase()) ||
+              produto.codigo.toString().includes(buscador)
+          )
+          .map((produto) => (
+            <ListGroup.Item
+              id="boxprod"
+              key={produto.codigo}
+              action
+              onClick={() => {
+                adicionarproduto(produto.codigo, produto.descricao, produto.PRECO);
+              }}
+            >
+              <a className="a"  id="tdDescrição" >  codigo: {produto.codigo}</a>
+              <a className="a"  id="tdDescrição"> {produto.descricao}</a>
+              <a className="a"  id="tdDescrição">
+                <Badge bg="primary" pill>
+                  R$: {produto.PRECO}
+                </Badge>
+              </a>
+            </ListGroup.Item>
+          ))}
+      </ListGroup>
+
+    </Accordion.Body>
+  </Accordion.Item>
+</Accordion>
+
+
+
+
+
+          <Accordion>
+
+            
 
 
 

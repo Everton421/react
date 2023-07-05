@@ -1,6 +1,6 @@
-@media only screen and (max-width: 320px) {
+@media only screen and (max-width: 250px) {
   *{
-    font-size: 6px;
+    font-size: 10px;
   }
 }
 
@@ -36,3 +36,25 @@ margin-top: 20px;
 
 }
 
+#tdDescrição{
+
+  font-size: 10px;
+  text-decoration: none;
+}
+#tdDescrição1{
+
+  font-size: 8px;
+  text-decoration: none;
+
+}
+
+#tdCodigo{
+  font-size: 8px;
+
+width: 5px;
+ height: auto;
+}
+
+#input{
+font-size: 8px;
+}
