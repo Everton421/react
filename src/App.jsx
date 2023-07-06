@@ -34,6 +34,7 @@ function App() {
 
   const [totalProduto, setTotalProduto] = useState(0);
   const [buscador, setBuscador] = useState("");
+  const [buscador1, setBuscador1] = useState("");
   const [clienteInvalido, setClienteInvalido] = useState(false);
  
   const [produtoInvalido , setProdutoInvalido] = useState(false);
@@ -152,6 +153,8 @@ function App() {
     }
     setOrcamento(novoOrcamento);
   }
+
+
 
   useEffect(() => {
     console.log(orcamento);
@@ -280,43 +283,44 @@ function App() {
       
       
       
-      
-          <Accordion >
-            <Accordion.Item eventKey="0">
-              <Accordion.Header >
 
-  
+          <Accordion>
+            <Accordion.Item eventKey="0">
+              <Accordion.Header>
                 <Badge bg="primary" pill>
                   cliente
                 </Badge>
-                <InputGroup.Text id="inputGroupPrepend">
-                  {cliorca.nome}</InputGroup.Text>
-                 
-                
-                  
+                <InputGroup.Text id="tdDescrição">
+                  {cliorca.nome}
+                </InputGroup.Text>
               </Accordion.Header>
               <Accordion.Body>
-                <Form noValidate >
+                <Form noValidate>
                   <Row className="mb-3">
-                    <Form.Group as={Col} md="4" >
-                      <Form.Label>cliente </Form.Label>
-                      <InputGroup.Text id="inputGroupPrepend">{cliorca.nome}</InputGroup.Text>
+                    <Form.Group as={Col} md="4">
+                      <Form.Label >
+                        <Badge>cliente</Badge>
+                      </Form.Label>
+                      <InputGroup.Text id="tdDescrição">
+                        {cliorca.nome}
+                      </InputGroup.Text>
                     </Form.Group>
                     <Form.Group as={Col} md="4" controlId="validationCustom02">
-                      <Form.Label>cpf</Form.Label>
-                      <InputGroup.Text id="inputGroupPrepend">{cliorca.cpf}</InputGroup.Text>
+                      <Form.Label> <Badge>cpf</Badge></Form.Label>
+                      <InputGroup.Text id="tdDescrição">{cliorca.cpf}</InputGroup.Text>
                     </Form.Group>
                     <Form.Group as={Col} md="4" controlId="validationCustom02">
-                      <Form.Label>IE/RG</Form.Label>
+                      <Form.Label><Badge>IE/RG</Badge></Form.Label>
                       <InputGroup.Text id="inputGroupPrepend">{cliorca.rg}</InputGroup.Text>
                     </Form.Group>
                   </Row>
                 </Form>
               </Accordion.Body>
             </Accordion.Item>
-          </Accordion> 
-          
-          
+          </Accordion>
+
+
+
        
 
 
@@ -324,7 +328,7 @@ function App() {
           <Table striped bordered hover>
             <thead>
               <tr>
-                <th id="tdCodigo">cod</th>
+             
                 <th id="tdDescrição" >descrição</th>
                 <th id="tdDescrição" >quantidade</th>
                 <th id="tdDescrição" >desconto</th>
@@ -335,7 +339,7 @@ function App() {
             </thead>
             {proorca.map((produto, index) => (<tbody>
               <tr>
-                <td  id="tdCodigo">{produto.prod}</td>
+                
                 <td id='tdDescrição1'>{produto.descricao}</td>
                 <td>
                   <InputGroup className="mb-2">
@@ -363,14 +367,14 @@ function App() {
 
                 </td>
                 <td>
-                  <a className='a' id="tdDescrição1"><Badge bg="primary" pill>
+                 <Badge bg="primary" pill id="tdDescrição1"> 
                     R$: {produto.preco}
-                  </Badge></a>
+                  </Badge>
                 </td>
                 <td>
-                  <a className='a' id="tdDescrição1"> <Badge bg="primary" pill>
+                   <Badge bg="primary" pill id="tdDescrição1">
                     R$: {produto.totalProduto}
-                  </Badge></a>
+                  </Badge>
                 </td>
                 <td>
 
@@ -413,12 +417,15 @@ function App() {
 
           <Accordion>
   <Accordion.Item eventKey="0">
-    <Accordion.Header>produtos</Accordion.Header>
+    <Accordion.Header> <a className='title'> produtos </a></Accordion.Header>
     <Accordion.Body>
       <Form.Control id="inlineFormInputGroup" placeholder="produto" type="text" onChange={(e) => setBuscador(e.target.value)} />
 
       <ListGroup defaultActiveKey="#link1">
-        {prod
+        {
+
+        buscador !== "" &&
+        prod
           .filter(
             (produto) =>
               produto.descricao.includes(buscador.toUpperCase()) ||
@@ -433,13 +440,13 @@ function App() {
                 adicionarproduto(produto.codigo, produto.descricao, produto.PRECO);
               }}
             >
-              <a className="a"  id="tdDescrição" >  codigo: {produto.codigo}</a>
-              <a className="a"  id="tdDescrição"> {produto.descricao}</a>
-              <a className="a"  id="tdDescrição">
-                <Badge bg="primary" pill>
+              <Badge bg="primary" pill id="tdDescrição"> {produto.codigo} </Badge>
+              <a className="a"  id="idDescriçãoclient">  {produto.descricao}
+             </a>
+                <Badge bg="primary" pill >
                   R$: {produto.PRECO}
                 </Badge>
-              </a>
+             
             </ListGroup.Item>
           ))}
       </ListGroup>
@@ -449,34 +456,39 @@ function App() {
 </Accordion>
 
 
+<Accordion>
+  <Accordion.Item eventKey="0">
+    <Accordion.Header> <a className='title'>clientes</a></Accordion.Header>
+             
+    <Accordion.Body>
+      <Form.Control id="inlineFormInputGroup" placeholder="cliente" type="text" onChange={(e) => setBuscador1(e.target.value)} />
+
+      {
+        buscador1 !== "" && // Verifica se o buscador1 não está vazio
+        client
+          .filter((cliente) =>
+            cliente.codigo.toString().includes(buscador1) ||
+            cliente.nome.toString().includes(buscador1)
+          )
+          .map((client) => (
+            <ListGroup defaultActiveKey="#link1">
+              <ListGroup.Item id='boxclient' action onClick={() => { adicionaClient(client) }}>
+                <Badge bg="primary" pill id="tdDescrição">
+                  {client.codigo}
+                </Badge>
+                <a id="idDescriçãoclient" className='a'>{client.nome}</a>
+                <Badge>
+                  cpf:{client.cpf}
+                </Badge>              
+              </ListGroup.Item>
+            </ListGroup>
+          ))
+      }
+    </Accordion.Body>
+  </Accordion.Item>
+</Accordion>
 
 
-
-          <Accordion>
-
-            
-
-
-
-
-            <Accordion.Item eventKey="0">
-              <Accordion.Header>clientes</Accordion.Header>
-              <Accordion.Body>
-
-                {client.map((client) => (
-                  <ListGroup defaultActiveKey="#link1"  >
-                    <ListGroup.Item id='boxclient' action onClick={() => { adicionaClient(client) }}>
-                      <a className='a' key={client.codigo}>codigo:{client.codigo}</a>
-                      <a className='a'> nome:{client.nome} </a>
-                      <a className='a'>cpf:{client.cpf}</a>
-                    </ListGroup.Item  >
-                  </ListGroup>
-                ))}
-
-              </Accordion.Body>
-            </Accordion.Item>
-
-          </Accordion>
         </div>
       </div>
     </div>

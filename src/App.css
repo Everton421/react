@@ -1,9 +1,3 @@
-@media only screen and (max-width: 250px) {
-  *{
-    font-size: 10px;
-  }
-}
-
 
 .dv{
 width: 100%;
@@ -25,7 +19,9 @@ margin-top: 20px;
 }
 #delete{
 
-  border-radius: 100px;
+  
+  height: 25px;
+  font-size: 10px;
 }
 
 
@@ -57,4 +53,13 @@ width: 5px;
 
 #input{
 font-size: 8px;
+}
+#idDescriçãoclient{
+  font-size: 8.5px;
+  margin-left: 5px;
+}
+.title{
+  font-size: 15px;
+  text-decoration: none;
+
 }
